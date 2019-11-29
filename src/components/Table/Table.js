@@ -29,6 +29,7 @@ const Table = (props) => {
 
     return (
       <div>
+      { props.items.length > 0 ? (
         <table className="orders-table" border="1">
         <tr>
           <th>Id</th>
@@ -40,6 +41,7 @@ const Table = (props) => {
         </tr>
             {list}
         </table>
+        ) : (<p>Add something...</p>)}
         <div className="add_order">
           <Button variant="primary"
           className="add_order__button" onClick={handleClose}>Add order</Button>
