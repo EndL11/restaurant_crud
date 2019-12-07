@@ -8,9 +8,9 @@
 .orders-table th{
     padding: 5px 10px;
 }
-.orders-table td{
+/* .orders-table td{
     width: 300px;
-}
+} */
 
 .add_order{
     margin-top: 100px;
@@ -54,4 +54,12 @@
     padding: 20px;
     border: 1px solid #888;
     width: 50%; /* Could be more or less, depending on screen size */
+  }
+  .btn-success {
+    margin-left: 15px;
+  }
+
+  .btn-warning {
+    float:right;
+    margin-top: 30px;
   }
