@@ -1,6 +1,8 @@
 import React from 'react';
 import './App.css';
 import Table from './components/Table/Table';
+import Menu from './components/Menu/Menu';
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
 const uuidv4 = require('uuid/v4');
 
@@ -15,7 +17,11 @@ export default class App extends React.Component {
       isEditing: false,
       editingObj: null,
       editingIndex: null,
-      listForms: [{id: uuidv4()}]
+      listForms: [{id: uuidv4()}],
+
+      editingDish: null,
+      isEditingDish: false,
+      editingName: null
     }
     this.onEdit = this.onEdit.bind(this);
     this.handleClose = this.handleClose.bind(this);
@@ -26,6 +32,14 @@ export default class App extends React.Component {
     this.deleteForm = this.deleteForm.bind(this);    
     this.cancelEdit = this.cancelEdit.bind(this); 
     this.onAdd = this.onAdd.bind(this);   
+
+    this.addDish = this.addDish.bind(this);   
+    this.onChangeDish = this.onChangeDish.bind(this);   
+    this.onDeleteDish = this.onDeleteDish.bind(this);   
+    this.onEditDish = this.onEditDish.bind(this);   
+    this.applyEditDish = this.applyEditDish.bind(this);   
+    
+    
   }
 
   deleteEmptyForms = (list) => {
@@ -207,13 +221,115 @@ export default class App extends React.Component {
     }
   }
 
+  /* 
+            ********************Меню********************
+  */
+  cancelEditDish = () => {
+    this.setState(prevState => ({isEditingDish: !prevState.isEditingDish}));
+    this.setState({editingDish: null});
+    this.handleClose();
+  }
+
+  addDish = (e) => {
+    e.preventDefault();
+    var name = e.target.name.value;
+    var price = Number(e.target.price.value);
+    var menu = this.state.menu;
+
+    if(name.split(" ").join("") === "" || price <= 0){
+      alert("Wrong data!");
+      return;
+    }
+    menu[name] = price;
+    this.setState({menu});
+    this.handleClose();
+  }
+
+  onChangeDish = (e) => {
+    var editingDish = this.state.editingDish;
+    var value = editingDish[Object.keys(editingDish)[0]];
+    
+    if(e.target.name === "name" && e.target.value.split(" ").join("") !== ""){
+      for(var key in editingDish){
+        key = e.target.value;
+        editingDish[key] = value;
+        delete editingDish[Object.keys(editingDish)[0]];
+      }
+    } 
+    else if(e.target.name === "price" && Number(e.target.value) >= 1) {
+      value = Number(e.target.value);
+      editingDish[Object.keys(editingDish)[0]] = value;
+    } 
+    else {
+      return;
+    }
+
+    this.setState({editingDish});
+
+  }
+
+  onEditDish = (e) => {
+    this.cancelEditDish();
+    var menu = this.state.menu;
+    var name = e.target.value;
+
+    var objForEdit = {[name]: menu[name]};
+   
+    this.setState({editingDish: objForEdit, editingName: Object.keys(objForEdit)[0]});
+
+  }
+
+  onDeleteDish = (e) => {
+    if(window.confirm("Are you sure that you want delete this dish?") === false)
+    {
+      return;
+    }
+    var newMenu = this.state.menu;
+    delete newMenu[e.target.value]
+    this.setState({
+      menu: newMenu,
+    });
+  }
+
+  applyEditDish = (e) => {
+    e.preventDefault();
+    
+    var menu = this.state.menu;
+
+    for(var i = 0; i < Object.keys(menu).length; i++){
+      if(Object.keys(this.state.editingDish)[0] === this.state.editingName)
+      continue;
+
+      if(Object.keys(menu)[i] === Object.keys(this.state.editingDish)[0]){
+        alert("Order of this orderer alredy exists!");
+        return;
+      }
+    }
+
+    console.log(this.state.editingName);
+    delete menu[this.state.editingName];
+    menu[Object.keys(this.state.editingDish)[0]] = this.state.editingDish[Object.keys(this.state.editingDish)[0]];
+    this.setState({menu, editingDish: null, editingName: null});
+    this.cancelEditDish();
+  }
+
   render(){
     return (
+      <Router>
       <div className="App">
         <header className="App-header">
+        <ul>
+          <li>
+          <Link to="/">Home</Link>
+          </li>
+          <li>
+          <Link to="/menu">Menu</Link>
+          </li>
+        </ul>
         <h1>Restaurant CRUD</h1>
         <p>Made by <a href="https://www.linkedin.com/in/endl/" className="App-link" target="blank">Podobailo Andriy</a></p>
         <br/>
+        <Route exact path="/">
         <Table 
         show_modal={this.state.show_modal}
         closeModal={this.handleClose}
@@ -231,10 +347,28 @@ export default class App extends React.Component {
         deleteForm = {this.deleteForm}
         onAdd = {this.onAdd}
         addFormEdit = {this.addFormEdit}
-        cancelEdit = {this.cancelEdit}
         />
+        </Route>
+
+        <Route path="/menu">
+        <Menu 
+        show_modal={this.state.show_modal}
+        menu={this.state.menu}
+        closeModal={this.handleClose}
+        addDish = {this.addDish}
+        onChangeDish={this.onChangeDish}
+        isEditingDish = {this.state.isEditingDish}
+        editingDish = {this.state.editingDish}
+        onDeleteDish = {this.onDeleteDish}
+        onEditDish = {this.onEditDish}
+        applyEditDish = {this.applyEditDish}
+        cancelEditDish = {this.cancelEditDish}
+
+        />
+        </Route>
         </header>
       </div>
+      </Router>
     );
   }
 }
