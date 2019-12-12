@@ -8,7 +8,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 const Table = (props) => {
     const menu = props.menu;
     const handleClose = props.closeModal;
-    const options = Object.keys(menu).map((el, index) => <option key={index}>{el}</option>);
+    const options = menu.map((el) => <option key={el.menuId}>{el.name}</option>);
     const editingOrder = props.editingObj;
     
     var editingOrderForms = null;
@@ -18,17 +18,22 @@ const Table = (props) => {
       <Form.Row>
         <Col>
           <Form.Label>Select dish:</Form.Label>
-          <Form.Control  as="select" name="name" onChange={(e) => props.onChangeEdit(e, el.id)} className="name" defaultValue={el.name}>
+          <Form.Control  as="select" name="name" 
+          onChange={(e) => props.onChangeEdit(e, el.id)} className="name" defaultValue={el.name}>
             {options}
           </Form.Control>
         </Col>
         <Col style= {{marginRight:"20px"}}>
           <Form.Label>Count</Form.Label>
-          <Form.Control style={{maxWidth:"100px"}} type="number" name="count" onChange={(e) => props.onChangeEdit(e, el.id)} className="count" defaultValue={el.count}/>
+          <Form.Control style={{maxWidth:"100px"}} type="number" name="count" 
+          onChange={(e) => props.onChangeEdit(e, el.id)} className="count" defaultValue={el.count}/>
         </Col>
         <Col>
           <Form.Label>Price</Form.Label>
-          <Form.Label style={{marginTop: "7px", display:"block"}}>{(menu[el.name] * el.count).toFixed(2)}$</Form.Label>
+          <Form.Label style={{marginTop: "7px", display:"block"}}>
+            {menu.find(item => el.name === item.name) !== undefined
+             ? (menu.find(item => el.name === item.name).price * el.count).toFixed(2)
+             : (0).toFixed(2)}$</Form.Label>
         </Col>
         <Col>
           <Button variant="warning" onClick={() => {props.deleteForm(el.id, true)}}>
@@ -63,24 +68,24 @@ const Table = (props) => {
       </Form.Group>
     );
 
-    // редагування списку замовлень
     const list = props.items.map((item) =>(
-      <tr key = {item.id}>
-        <td>{item.id}</td>
+      <tr key = {item.orderId}>
+        <td>{item.orderId}</td>
         <td>{item.orderer}</td>
         <td>
-          {item["orderArray"].map((el, id) => 
-            <span style={{border: "none"}} key={id}>{el.name} - {el.count} <br/> </span>
+          {item["orderArray"].map((el) => 
+            <span style={{border: "none"}} key={el.id}>{el.name} - {el.count} <br/> </span>
         )}
         </td>
         <td>
-        {(item["orderArray"].map(el => menu[el.name] * el.count)
+        {(item["orderArray"].map(el => menu.find(item => el.name === item.name) !== undefined &&
+         menu.find(item => el.name === item.name).price * el.count)
         .reduce((prev, current) => {return prev + current}, 0)).toFixed(2)}$</td>
         <td>
         <Button variant="outline-primary"
-        onClick={props.onEdit} value ={item.id} className="td__button">Edit</Button>
+        onClick={props.onEdit} value ={item.orderId} className="td__button">Edit</Button>
         <Button variant="outline-danger"
-        onClick={props.onDelete} value ={item.id} className="td__button">Delete</Button>
+        onClick={props.onDelete} value ={item.orderId} className="td__button">Delete</Button>
         </td>
       </tr>
     ));
@@ -107,7 +112,7 @@ const Table = (props) => {
         </div>
 
         {props.isEditing  ? (
-        <Modal show={props.show_modal} onHide={props.cancelEdit}>
+        <Modal show={props.show_modal} onHide={props.cancelEdit}  scrollable="true">
         <Modal.Header closeButton>
           <Modal.Title>Editing order</Modal.Title>
         </Modal.Header>
@@ -137,7 +142,7 @@ const Table = (props) => {
         </Modal.Body> 
         </Modal>
         ) : (
-          <Modal show={props.show_modal} onHide={handleClose}>
+          <Modal show={props.show_modal} onHide={handleClose}  scrollable="true">
         <Modal.Header closeButton>
           <Modal.Title>Adding new order</Modal.Title>
         </Modal.Header>

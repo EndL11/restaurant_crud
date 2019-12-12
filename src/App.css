@@ -25,3 +25,12 @@
   color: #089e80;
   text-decoration: none;
 }
+
+.navnav li a{
+  margin-right: 30px;
+  color: #089e80;
+}
+.navnav li a:hover{
+  color: #0aebbe;
+  text-decoration: none;
+}

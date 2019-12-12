@@ -1,81 +1,76 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import axios from 'axios';
+
 import './App.css';
 import Table from './components/Table/Table';
 import Menu from './components/Menu/Menu';
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
-const uuidv4 = require('uuid/v4');
+const uuidv4 = require('uuid/v4');                                // функція для генерації унікального id
 
-export default class App extends React.Component {
-  constructor(props){
-    super(props);
-    
-    this.state = {
-      menu:{"Salad": 3.50, "Sushi": 9.65, "Pizza": 12.30},
-      orderList: [],
-      show_modal: false,
-      isEditing: false,
-      editingObj: null,
-      editingIndex: null,
-      listForms: [{id: uuidv4()}],
+export function Application(){
+  const [list, setList] = useState([]);                           // список замовлень
+  const [editingObj, setEditingObj] = useState(null);             // об єкт обраний для редагування 
+  const [menu, setMenu] = useState([]);                           // меню
+  const [show_modal, setShow] = useState(false);                  // показувати модальне вікно
+  const [isEditing, setIsEditing] = useState(false);              // чи редагується об єкт
+  const [editingIndex, setEditingIndex] = useState(null);         // індект об єкта, що редагується
+  const [listForms, setFormsList] = useState([{id: uuidv4()}]);   // масив із "формами" для множинного замовлення страв
 
-      editingDish: null,
-      isEditingDish: false,
-      editingName: null
+  const [editingDish, setEditingDish] = useState(null);           // об єкт обраний для редагування (страва)
+  const [isEditingDish, setIsEditingDish] = useState(false);      // чи редагується об єкт
+  const [editingDishIndex, setEditingDishIndex] = useState(null); // індекс об єкта, що редагується
+
+  // перше оновлення даних замовлень із сервера
+  useEffect(()=>{
+    axios.get('http://localhost:3001/orderList').then(({data}) => {
+         setList(data);
+    });
+  }, []);
+
+  // перше оновлення даних меню із сервера
+  useEffect(()=>{
+    axios.get('http://localhost:3001/menu').then(({data}) => {
+         setMenu(data);
+    });
+  }, []);
+
+  // очищення порожніх "форм"
+  const deleteEmptyForms = (list) => {
+    if(list.length >= 1){
+     let formIndex = null;
+     let i = 0;
+     while(i < list.length){
+       if(list[i].count <= 0 || list[i].count === null){
+         formIndex = list.findIndex((value) => value.id === list[i].id);
+         list.splice(formIndex, 1);
+       }
+       else {
+         i++;
+       }
+     }
+    } 
+    else {
+       return;
     }
-    this.onEdit = this.onEdit.bind(this);
-    this.handleClose = this.handleClose.bind(this);
-    this.onDelete = this.onDelete.bind(this);
-    this.applyEdit = this.applyEdit.bind(this);
-    this.onChangeEdit = this.onChangeEdit.bind(this);    
-    this.addForm = this.addForm.bind(this);    
-    this.deleteForm = this.deleteForm.bind(this);    
-    this.cancelEdit = this.cancelEdit.bind(this); 
-    this.onAdd = this.onAdd.bind(this);   
-
-    this.addDish = this.addDish.bind(this);   
-    this.onChangeDish = this.onChangeDish.bind(this);   
-    this.onDeleteDish = this.onDeleteDish.bind(this);   
-    this.onEditDish = this.onEditDish.bind(this);   
-    this.applyEditDish = this.applyEditDish.bind(this);   
-    
-    
-  }
-
-  deleteEmptyForms = (list) => {
-   if(list.length >= 1){
-    var formIndex = null;
-    var i = 0;
-    while(i < list.length){
-      if(list[i].count <= 0 || list[i].count === null){
-        formIndex = list.findIndex((value) => value.id === list[i].id);
-        list.splice(formIndex, 1);
-      }
-      else {
-        i++;
-      }
-    }
-   } 
-   else {
-      return;
    }
-  }
+   
+  // додавання "форм" при редагування об єкта 
+  const addFormEdit = () => {
+     let editObj = editingObj;
+     editObj["orderArray"].push({
+       id: uuidv4(),
+       name: Object.keys(menu)[0],
+       count: null 
+       });
+     setEditingObj(editObj);
+   }
 
-  addFormEdit = () => {
-    var editObj = this.state.editingObj;
-    editObj["orderArray"].push({
-      id: uuidv4(),
-      name: Object.keys(this.state.menu)[0],
-      count: null 
-      });
+   // контроль полів вводу при редагуванні
+   const onChangeEdit = (e, id = 0) => {
+    let orderer = editingObj["orderer"];
 
-    this.setState({editingObj: editObj});
-  }
-
-  onChangeEdit = (e, id = 0) => {
-    var orderer = this.state.editingObj["orderer"];
-
-    var orderArray = this.state.editingObj["orderArray"];
+    let orderArray = editingObj["orderArray"];
 
     if(e.target.name === "orderer" && e.target.value.split(" ").join("") !== ""){
       orderer = e.target.value;
@@ -88,40 +83,42 @@ export default class App extends React.Component {
       alert("Wrong data!");
       return;
     }
-    this.setState(prevState => ({editingObj: {id: prevState.editingObj["id"], orderer, orderArray}}));
-  }
-  
-  cancelEdit = () => {
-    this.setState(prevState => ({
-      isEditing: !prevState.isEditing,
-      editingObj: null,
-      editingIndex: null
-    }));
-    this.handleClose();
+    setEditingObj({orderId: editingObj["orderId"], orderer, orderArray, id: editingObj["id"]});
+
   }
 
-  handleClose = () => {
-    this.setState(prevState => ({
-      show_modal: !prevState.show_modal,
-      listForms: [{id: uuidv4()}]
-    }));
-}
+  // відміна редагування
+  const cancelEdit = () => {
+    setEditingIndex(null);
+    setIsEditing(!isEditing);
+    setEditingObj(null);
+    handleClose();
+  }
 
-  onAdd = (count, names, counts, orderer) => {
-    var orderListNew = [];
+  // закриття вікна
+  const handleClose = () => {
+    setShow(!show_modal);
+    setFormsList([{id: uuidv4()}]);
+  }
+
+  // додавання нового замовлення
+  const onAdd = (count, names, counts, orderer) => {
+    let orderListNew = [];
     
-    var filter = this.state.orderList;
-    var theSameOrderer = null;
+    let filter = list;
+
+    //перевірка на існуючого замовника
+    let theSameOrderer = null;
     if(filter !== null){
       theSameOrderer = filter.filter(element => element["orderer"] === orderer.value).length;
     }
-
     if(orderer.value.split(' ').join('') === "" || theSameOrderer > 0){
       alert("Wrong data!");
       return;
     }
 
-    for(var i = 0; i < count; i++){
+    // створення списку із стравами та їх кількістю за умови вірності данних
+    for(let i = 0; i < count; i++){
       if(names[i].value.split(' ').join('') !== "" && Number(counts[i].value) > 0)
       orderListNew.push({id: uuidv4(), name: names[i].value, count: Number(counts[i].value)});
       else{
@@ -135,190 +132,253 @@ export default class App extends React.Component {
       return;
     }
 
-    var list = this.state.orderList;
-    list.push({id: uuidv4(), orderer: orderer.value, orderArray: orderListNew});
-    this.setState({orderList: list});
-    this.handleClose();
+    let newObj = {orderId: uuidv4(), orderer: orderer.value, orderArray: orderListNew};
+    filter.push(newObj);
+
+    // відправлення та оновлення даних із серверної частини
+    axios.post('http://localhost:3001/orderList', newObj).finally(() => {
+      axios.get('http://localhost:3001/orderList').then(({data}) => {
+        setList(data);
+      });
+    });
+
+    setList(filter);
+    handleClose();
   }
 
-  onDelete = (e) => {
+  // видалення замовлення по id
+  const onDelete = (e) => {
     if(window.confirm("Are you sure that you want delete this order?") === false)
     {
       return;
     }
-    var newList = this.state.orderList;
-    var index = newList.findIndex(val => val.id === e.target.value);
+    let newList = list;
+    let index = newList.findIndex(val => val.orderId === e.target.value);
+    let id = newList.find(val => val.orderId === e.target.value).id;
     newList.splice(index, 1);  
-    this.setState({
-      orderList: newList,
-      listForms : [{id: uuidv4()}]
-    });
+
+    axios.delete('http://localhost:3001/orderList/'+ id + "/");
+    setList(newList);
+    setFormsList([{id: uuidv4()}]);
+
   }
 
-  applyEdit = (e) => {
+  // підтвердження редагування об єкта та збереження змін
+  const applyEdit = (e) => {
     e.preventDefault();
     
-    var list = this.state.orderList;
-    var orderArray = this.state.editingObj["orderArray"];
+    let newList = list;
+    let orderArray = editingObj["orderArray"];
 
-    this.deleteEmptyForms(orderArray);
-    this.setState({editingObj: {id: this.state.editingObj["id"],
-     orderer: this.state.editingObj["orderer"], orderArray}});
+    // видалення пустих "форм"
+    deleteEmptyForms(orderArray);
+
+    setEditingObj({orderId: editingObj["orderId"],
+    orderer: editingObj["orderer"], orderArray, id: editingObj["id"]});
 
 
-    for(var i = 0; i < list.length; i++){
-      if(i === this.state.editingIndex)
+    for(let i = 0; i < newList.length; i++){
+      if(i === editingIndex)
       continue;
 
-      if(list[i].orderer === this.state.editingObj.orderer){
-        alert("Order of this orderer alredy exists!");
+      if(newList[i].orderer === editingObj.orderer){
+        alert("Order of this orderer already exists!");
         return;
       }
     }
-
 
     if(orderArray.length <= 0){
       alert("Wrong data!\nAdd some dishes!");
       return;
     }else{
-      if(this.state.editingObj !== list[this.state.editingIndex])
+      if(editingObj !== newList[editingIndex])
       {
-        list[this.state.editingIndex] = this.state.editingObj;
-        this.setState({orderList: list});
+        newList[editingIndex] = editingObj;
+        setList(newList);
+        axios.put('http://localhost:3001/orderList/' + editingObj.id + "/", editingObj);
       }
     }
-    this.cancelEdit();
+    cancelEdit();
   }
 
-  onEdit = (e) => {
-    var list = this.state.orderList;
-    var index = list.findIndex(val => val.id === e.target.value);
+  // визначення об єкта для редагування
+  const onEdit = (e) => {
+    let newList = list;
+    let index = newList.findIndex(val => val.orderId === e.target.value);
 
     // копіювання об'єкту
-    var objForEdit = JSON.parse(JSON.stringify(list.find(value => value.id === e.target.value)));
+    let objForEdit = JSON.parse(JSON.stringify(newList.find(value => value.orderId === e.target.value)));
    
-    this.setState({editingObj: objForEdit, editingIndex: index});
-    this.setState(prevState => ({isEditing: !prevState.isEditing}));
-    this.handleClose();
+    setEditingObj(objForEdit);
+    setEditingIndex(index);
+    setIsEditing(!isEditing);
+
+    handleClose();
   }
 
-  addForm = () => {
-    var obj = {id: uuidv4()};
-    this.setState(prevState => ({listForms: prevState.listForms.length > 0 ? [...prevState.listForms, obj] : [obj]}));
+  // додавання "форм" при додаванні замовлення
+  const addForm = () => {
+    let obj = {id: uuidv4()};
+    if(listForms.length > 0){
+      setFormsList([...listForms, obj]);
+    }
+    else {
+      setFormsList([obj]);
+    }
   }
 
-  deleteForm = (id, i = false) => {
+  // видалення "форм" (при редагування та додаванні) замовлення
+  const deleteForm = (id, i = false) => {
     if(i === false){
-      var list = this.state.listForms;
-      var objIndex = list.findIndex(value => value["id"] === id);
+      let list = listForms;
+      let objIndex = list.findIndex(value => value["id"] === id);
       list.splice(objIndex, 1);
-      this.setState({listForms: list});
+      setFormsList(list);
     }else{
-      var editOrder = this.state.editingObj;
+      let editOrder = editingObj;
       const formIndex = editOrder["orderArray"].findIndex(value => value["id"] === id);
       editOrder["orderArray"].splice(formIndex, 1);
-      this.setState({editingObj: editOrder});
+      setEditingObj(editOrder);
     }
   }
 
   /* 
             ********************Меню********************
   */
-  cancelEditDish = () => {
-    this.setState(prevState => ({isEditingDish: !prevState.isEditingDish}));
-    this.setState({editingDish: null});
-    this.handleClose();
+
+  // відміна редагування страви
+  const cancelEditDish = () => {
+   setIsEditingDish(!isEditingDish);
+   setEditingDishIndex(null);
+   setEditingDish(null);
+   handleClose();
   }
 
-  addDish = (e) => {
+  // додавання страви
+  const addDish = (e) => {
     e.preventDefault();
-    var name = e.target.name.value;
-    var price = Number(e.target.price.value);
-    var menu = this.state.menu;
+    let name = e.target.name.value;
+    let price = Number(e.target.price.value);
+    let newMenu = menu;
 
-    if(name.split(" ").join("") === "" || price <= 0){
+    if(name.split(" ").join("") === "" || price <= 0 || isNaN(price) === true){
       alert("Wrong data!");
       return;
     }
-    menu[name] = price;
-    this.setState({menu});
-    this.handleClose();
+
+    // перевірка на схожість страви
+    let theSameDish = null;
+    if(newMenu !== null){
+      theSameDish = newMenu.filter(element => element.name === name).length;
+    }
+
+    if(theSameDish > 0){
+      alert("Wrong data! Dish is exists!");
+      return;
+    }
+
+
+    let newDish = {menuId: uuidv4(), name, price};
+
+    // додавання страви та оновлення даних на серверній частині
+    axios.post('http://localhost:3001/menu', newDish).finally(() => {
+      axios.get('http://localhost:3001/menu').then(({data}) => {
+        setMenu(data);
+      });
+    });
+    setMenu([...newMenu, newDish]);
+    handleClose();
   }
 
-  onChangeDish = (e) => {
-    var editingDish = this.state.editingDish;
-    var value = editingDish[Object.keys(editingDish)[0]];
+  // контроль полів вводу даних при релдагуванні
+  const onChangeDish = (e) => {
+    let newEditingDish = editingDish;
     
     if(e.target.name === "name" && e.target.value.split(" ").join("") !== ""){
-      for(var key in editingDish){
-        key = e.target.value;
-        editingDish[key] = value;
-        delete editingDish[Object.keys(editingDish)[0]];
-      }
+      newEditingDish.name = e.target.value;
     } 
-    else if(e.target.name === "price" && Number(e.target.value) >= 1) {
-      value = Number(e.target.value);
-      editingDish[Object.keys(editingDish)[0]] = value;
+    else if(e.target.name === "price" && Number(e.target.value) > 0) {
+      newEditingDish.price = Number(e.target.value.replace(",", "."));
     } 
     else {
       return;
     }
 
-    this.setState({editingDish});
+    setEditingDish(newEditingDish);
 
   }
 
-  onEditDish = (e) => {
-    this.cancelEditDish();
-    var menu = this.state.menu;
-    var name = e.target.value;
+  // визначення об єкта для редагування
+  const onEditDish = (e) => {
+    cancelEditDish();
+    let newMenu = menu;
+    let menuId = e.target.value;
 
-    var objForEdit = {[name]: menu[name]};
+    let index = newMenu.findIndex(el => el.menuId === menuId);
+
+    let objForEdit = JSON.parse(JSON.stringify(newMenu[index]));
    
-    this.setState({editingDish: objForEdit, editingName: Object.keys(objForEdit)[0]});
-
+    setEditingDish(objForEdit);
+    setEditingDishIndex(index);
   }
 
-  onDeleteDish = (e) => {
+  // видалення страви
+  const onDeleteDish = (e) => {
     if(window.confirm("Are you sure that you want delete this dish?") === false)
     {
       return;
     }
-    var newMenu = this.state.menu;
-    delete newMenu[e.target.value]
-    this.setState({
-      menu: newMenu,
-    });
+    let menuId = e.target.value;
+    let newMenu = menu;
+    let deletingOBj = newMenu.find(el => el.menuId === menuId);
+    let index = newMenu.findIndex(el => el.menuId === menuId);
+    axios.delete('http://localhost:3001/menu/' + deletingOBj.id + '/');
+    newMenu.splice(index, 1);
+    newMenu = JSON.parse(JSON.stringify(newMenu));
+    setMenu(newMenu);
   }
 
-  applyEditDish = (e) => {
+  // підтвердження редагування та застосування змін 
+  const applyEditDish = (e) => {
     e.preventDefault();
-    
-    var menu = this.state.menu;
-
-    for(var i = 0; i < Object.keys(menu).length; i++){
-      if(Object.keys(this.state.editingDish)[0] === this.state.editingName)
+    let newMenu = menu;
+    for(let i = 0; i < newMenu.length; i++){
+      if(editingDish.name === newMenu[editingDishIndex].name)
       continue;
-
-      if(Object.keys(menu)[i] === Object.keys(this.state.editingDish)[0]){
-        alert("Order of this orderer alredy exists!");
+      
+      if(newMenu[i].name === editingDish.name){
+        alert("Dish with this name already exists!");
         return;
       }
     }
 
-    console.log(this.state.editingName);
-    delete menu[this.state.editingName];
-    menu[Object.keys(this.state.editingDish)[0]] = this.state.editingDish[Object.keys(this.state.editingDish)[0]];
-    this.setState({menu, editingDish: null, editingName: null});
-    this.cancelEditDish();
+    // оновлення списку замовлень відповідно до зміни назви страви
+    let newList = list;
+    for(let i = 0; i < newList.length; i++){
+      newList[i]["orderArray"].forEach(item => {
+        if(item.name === newMenu[editingDishIndex].name){
+          item.name = editingDish.name;
+          axios.put('http://localhost:3001/orderList/' + newList[i].id + "/", newList[i]);
+        }
+      });
+    }
+    newMenu[editingDishIndex] = editingDish;  
+    setList(newList);
+    axios.put('http://localhost:3001/menu/' + editingDish.id + "/", editingDish).finally(() => {
+      axios.get('http://localhost:3001/menu').then(({data}) => {
+        setMenu(data);
+      });
+    });
+    setMenu(newMenu);
+    setEditingDish(null);
+    cancelEditDish();
   }
 
-  render(){
-    return (
-      <Router>
+  return(
+    <Router>
       <div className="App">
         <header className="App-header">
-        <ul>
+        <ul className="nav navbar navnav">
           <li>
           <Link to="/">Home</Link>
           </li>
@@ -331,45 +391,42 @@ export default class App extends React.Component {
         <br/>
         <Route exact path="/">
         <Table 
-        show_modal={this.state.show_modal}
-        closeModal={this.handleClose}
-        items = {this.state.orderList} 
-        menu = {this.state.menu}
-        onEdit = {this.onEdit}
-        onDelete = {this.onDelete}
-        isEditing = {this.state.isEditing}
-        editingObj = {this.state.editingObj}
-        applyEdit = {this.applyEdit}
-        cancelEdit = {this.cancelEdit}
-        onChangeEdit={this.onChangeEdit}
-        addForm = {this.addForm}
-        forms = {this.state.listForms}
-        deleteForm = {this.deleteForm}
-        onAdd = {this.onAdd}
-        addFormEdit = {this.addFormEdit}
+        show_modal={show_modal}
+        closeModal={handleClose}
+        items = {list} 
+        menu = {menu}
+        onEdit = {onEdit}
+        onDelete = {onDelete}
+        isEditing = {isEditing}
+        editingObj = {editingObj}
+        applyEdit = {applyEdit}
+        cancelEdit = {cancelEdit}
+        onChangeEdit={onChangeEdit}
+        addForm = {addForm}
+        forms = {listForms}
+        deleteForm = {deleteForm}
+        onAdd = {onAdd}
+        addFormEdit = {addFormEdit}
         />
         </Route>
 
         <Route path="/menu">
         <Menu 
-        show_modal={this.state.show_modal}
-        menu={this.state.menu}
-        closeModal={this.handleClose}
-        addDish = {this.addDish}
-        onChangeDish={this.onChangeDish}
-        isEditingDish = {this.state.isEditingDish}
-        editingDish = {this.state.editingDish}
-        onDeleteDish = {this.onDeleteDish}
-        onEditDish = {this.onEditDish}
-        applyEditDish = {this.applyEditDish}
-        cancelEditDish = {this.cancelEditDish}
-
+        show_modal={show_modal}
+        menu={menu}
+        closeModal={handleClose}
+        addDish = {addDish}
+        onChangeDish={onChangeDish}
+        isEditingDish = {isEditingDish}
+        editingDish = {editingDish}
+        onDeleteDish = {onDeleteDish}
+        onEditDish = {onEditDish}
+        applyEditDish = {applyEditDish}
+        cancelEditDish = {cancelEditDish}
         />
         </Route>
         </header>
       </div>
-      </Router>
-    );
-  }
+    </Router>
+  );
 }
-

@@ -8,25 +8,25 @@ const Menu = (props) => {
     const handleClose = props.closeModal;
     const editingDish = props.editingDish;
 
-    const list = Object.keys(menu).map((item) =>(
-      <tr key = {item}>
+    const list = menu.map((item) =>(
+      <tr key = {item.menuId}>
         <td>
-          {item}
+          {item.name}
         </td>
         <td>
-        {(menu[item]).toFixed(2)}$</td>
+        {(item.price).toFixed(2)}$</td>
         <td>
         <Button variant="outline-primary"
-        onClick={props.onEditDish} value ={item} className="td__button">Edit</Button>
+        onClick={props.onEditDish} value ={item.menuId} className="td__button">Edit</Button>
         <Button variant="outline-danger"
-        onClick={props.onDeleteDish} value ={item} className="td__button">Delete</Button>
+        onClick={props.onDeleteDish} value ={item.menuId} className="td__button">Delete</Button>
         </td>
       </tr>
     ));
 
     return (
       <div>
-      { Object.keys(menu).length > 0 ? (
+      { menu.length > 0 ? (
         <table className="orders-table" border="1">
         <tbody>
           <tr>
@@ -53,12 +53,12 @@ const Menu = (props) => {
           <Form.Group controlId="formBasicText">
             <Form.Label>Name</Form.Label>
             <Form.Control type="text" name="name" className="name"
-             onChange={props.onChangeDish} defaultValue={Object.keys(editingDish)[0]}/>
+             onChange={props.onChangeDish} defaultValue={editingDish.name}/>
           </Form.Group>
           <Form.Group controlId="formBasicText">
             <Form.Label>Price</Form.Label>
             <Form.Control  type="text" name="price" className="price"
-             onChange={props.onChangeDish} defaultValue={(editingDish[Object.keys(editingDish)[0]]).toFixed(2)}/>
+             onChange={props.onChangeDish} defaultValue={(editingDish.price).toFixed(2)}/>
           </Form.Group>
 
             <Button variant="primary" type="submit" onClick={props.applyEditDish}>
