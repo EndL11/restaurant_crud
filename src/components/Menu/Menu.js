@@ -8,7 +8,6 @@ const Menu = (props) => {
     const handleClose = props.closeModal;
     const editingDish = props.editingDish;
 
-
     const list = menu.map((item) =>(
       <tr key = {item.menuId}>
         <td>
