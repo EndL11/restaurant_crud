@@ -120,7 +120,7 @@ export function Application(){
     // створення списку із стравами та їх кількістю за умови вірності данних
     for(let i = 0; i < count; i++){
       if(names[i].value.split(' ').join('') !== "" && Number(counts[i].value) > 0)
-      orderListNew.push({id: uuidv4(), name: names[i].value, count: Number(counts[i].value)});
+        orderListNew.push({id: uuidv4(), name: names[i].value, count: Number(counts[i].value)});
       else{
         alert("Wrong data!");
         return;

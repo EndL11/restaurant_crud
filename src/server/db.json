@@ -15,9 +15,10 @@
     {
       "menuId": "5094b164-f030-410e-bc5e-2659ca7ea3f7",
       "name": "Pizza",
-      "price": 12.3,
+      "price": 12.30,
       "id": 6
     }
   ],
-  "orderList": []
+  "orderList": [
+  ]
 }
