@@ -1,12 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import {useSelector, useDispatch} from 'react-redux'
 import {Form, Modal, Button} from 'react-bootstrap';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { loadMenu } from '../../store/actions/menu';
 
 const Menu = (props) => {
-    const menu = props.menu;
+    const dispatch = useDispatch();
+
+    const menu = useSelector(state => state.menu.menu);
     const handleClose = props.closeModal;
     const editingDish = props.editingDish;
+
+    useEffect(() => {
+      dispatch(loadMenu());
+    }, [])
 
     const list = menu.map((item) =>(
       <tr key = {item.menuId}>

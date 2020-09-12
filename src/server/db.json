@@ -15,10 +15,44 @@
     {
       "menuId": "5094b164-f030-410e-bc5e-2659ca7ea3f7",
       "name": "Pizza",
-      "price": 12.30,
+      "price": 12.3,
       "id": 6
     }
   ],
   "orderList": [
+    {
+      "orderId": "d120eaa6-c5db-46e2-a6d4-5a5f951fe92b",
+      "orderer": "455",
+      "orderArray": [
+        {
+          "id": "80709ed4-02da-4ea3-8616-6bba38020475",
+          "name": "Salad",
+          "count": 1
+        },
+        {
+          "id": "24f0b695-fc8b-497f-8676-92c1f429691b",
+          "name": "Salad",
+          "count": 1
+        }
+      ],
+      "id": 1
+    },
+    {
+      "orderId": "bc916e0e-447a-4dc6-b1b9-238b4f59f63f",
+      "orderer": "000",
+      "orderArray": [
+        {
+          "id": "daa5b147-7845-4dbb-96d9-d6f9529fa8c4",
+          "name": "Salad",
+          "count": 2
+        },
+        {
+          "id": "b4e5656f-c4ce-4dc3-bc2e-1682f6bd430f",
+          "name": "Pizza",
+          "count": 2
+        }
+      ],
+      "id": 2
+    }
   ]
 }
