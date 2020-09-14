@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import {useDispatch, useSelector} from 'react-redux'
-import { Form, Modal, Button, Col } from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux'
+import { Form, Modal, Button, Col, Spinner } from 'react-bootstrap';
 
 import './table.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -9,10 +9,11 @@ import { loadOrders } from '../../store/actions/order';
 
 
 const Table = (props) => {
+  //const [editingObject, setEditingObject] = useState(null);
 
   const dispatch = useDispatch();
   const orderList = useSelector(state => state.order.orderList);
-  const menu = props.menu;
+  const menu = useSelector(state => state.menu.menuList);
   const handleClose = props.closeModal;
   const options = menu.map((el) => <option key={el.menuId}>{el.name}</option>);
   const editingOrder = props.editingObj;
@@ -20,7 +21,7 @@ const Table = (props) => {
 
   useEffect(() => {
     dispatch(loadOrders());
-  }, [])
+  }, [dispatch])
 
   const getEditingOrderForms = () => {
     if (editingOrder !== null) {
@@ -86,12 +87,12 @@ const Table = (props) => {
     let price = item["orderArray"].map(el => menu.find(item => el.name === item.name) !== undefined &&
       menu.find(item => el.name === item.name).price * el.count).reduce((prev, current) => { return prev + current }, 0)
 
-    return <OrderItem item={item} onDelete={props.onDelete} onEdit={props.onEdit} totalPrice={price} />;
+    return <OrderItem key={item.orderId} item={item} onDelete={props.onDelete} onEdit={props.onEdit} totalPrice={price} />;
   });
 
   return (
     <div>
-      {props.items.length > 0 ? (
+      {list.length > 0 ? (
         <table className="orders-table" border="1">
           <tbody>
             <tr>
@@ -104,7 +105,10 @@ const Table = (props) => {
             {list}
           </tbody>
         </table>
-      ) : (<p>Add something...</p>)}
+      ) : (<>
+        <Spinner animation="border" />
+      </>
+        )}
       <div className="add_order">
         <Button variant="primary"
           className="add_order__button" onClick={handleClose}>Add order</Button>

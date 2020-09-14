@@ -4,3 +4,6 @@ export const DELETE_DISH = 'DELETE_DISH';
 export const DELETE_ORDER = 'DELETE_ORDER';
 export const LOAD_MENU = 'LOAD_MENU';
 export const LOAD_ORDERS = 'LOAD_ORDERS';
+export const TOGGLE_MODAL = 'TOGGLE_MODAL';
+export const SET_EDITING_OBJECT = 'SET_EDITING_OBJECT';
+export const RESET_EDITING_OBJECT = 'RESET_EDITING_OBJECT';

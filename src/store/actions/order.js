@@ -9,7 +9,7 @@ export const addOrder = (order) => ({
 
 export const loadOrders = () => {
     return async (dispatch) => {
-        await axios.get('http://localhost:3001/orderList').then(({data}) => {
+        await axios.get('http://localhost:3001/orderList').then(({ data }) => {
             dispatch({
                 type: LOAD_ORDERS,
                 payload: data

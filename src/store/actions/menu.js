@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-import { LOAD_MENU } from "../types";
-
+import { ADD_DISH, DELETE_DISH, LOAD_MENU } from "../types";
 
 export const loadMenu = () => {
     return async (dispatch) => {
@@ -11,6 +10,27 @@ export const loadMenu = () => {
                 payload: data
             });
         });
+    }
+}
 
+export const addDish = (dish) => {
+    return async (dispatch) => {
+        await axios.post('http://localhost:3001/menu', dish).finally(() => {
+            dispatch({
+                type: ADD_DISH,
+                payload: dish
+            })
+        });
+    }
+}
+
+export const deleteDIsh = (id) => {
+    return async (dispatch) => {
+        await axios.delete('http://localhost:3001/menu/' + id + '/').finally(() => {
+            dispatch({
+                type: DELETE_DISH,
+                payload: id
+            })
+        });
     }
 }
