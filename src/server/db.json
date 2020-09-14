@@ -17,65 +17,38 @@
       "name": "Pizza",
       "price": 12.3,
       "id": 6
-    },
-    {
-      "menuId": "8de08b6b-07a9-4dd2-8345-a7ba5013e7d7",
-      "name": "111",
-      "price": 5,
-      "id": 7
-    },
-    {
-      "menuId": "7891c80b-0c13-477b-956e-602b3b5bc446",
-      "name": "55",
-      "price": 1,
-      "id": 8
     }
   ],
   "orderList": [
     {
-      "orderId": "d120eaa6-c5db-46e2-a6d4-5a5f951fe92b",
-      "orderer": "455",
+      "orderId": "f95cfab0-290e-45fa-9a6d-66fe0832abd7",
+      "orderer": "2",
       "orderArray": [
         {
-          "id": "80709ed4-02da-4ea3-8616-6bba38020475",
+          "id": "0794d678-8c99-4c0f-ba7b-7fe0bed06cf0",
           "name": "Salad",
-          "count": 1
-        },
-        {
-          "id": "24f0b695-fc8b-497f-8676-92c1f429691b",
-          "name": "Salad",
-          "count": 1
+          "count": 6
         }
       ],
-      "id": 1
-    },
-    {
-      "orderId": "bc916e0e-447a-4dc6-b1b9-238b4f59f63f",
-      "orderer": "000",
-      "orderArray": [
-        {
-          "id": "daa5b147-7845-4dbb-96d9-d6f9529fa8c4",
-          "name": "Salad",
-          "count": 2
-        },
-        {
-          "id": "b4e5656f-c4ce-4dc3-bc2e-1682f6bd430f",
-          "name": "Pizza",
-          "count": 2
-        }
-      ],
+      "totalPrice": 21,
       "id": 2
     },
     {
-      "orderId": "2beb8ac7-7e44-498a-b14e-0453ef97b618",
-      "orderer": "44",
+      "orderId": "f0fffd46-d8d6-4889-b8a1-212bf727668f",
+      "orderer": "3",
       "orderArray": [
         {
-          "id": "380d2f43-979b-43c4-a592-d2a6b8a7173b",
+          "id": "ed5936d1-c30a-47f4-ab3f-e47be032ba0b",
           "name": "Salad",
-          "count": 52
+          "count": 2
+        },
+        {
+          "id": "94b8629f-c15e-408e-a61c-f73190e5803e",
+          "name": "Sushi",
+          "count": 5
         }
       ],
+      "totalPrice": 48.25,
       "id": 3
     }
   ]

@@ -396,6 +396,7 @@ export function Application() {
                 deleteForm={deleteForm}
                 onAdd={onAdd}
                 addFormEdit={addFormEdit}
+                idGenerator={uuidv4}
               />
             </Route>
 
@@ -412,6 +413,7 @@ export function Application() {
                 onEditDish={onEditDish}
                 applyEditDish={applyEditDish}
                 cancelEditDish={cancelEditDish}
+                idGenerator={uuidv4}
               />
             </Route>
           </header>

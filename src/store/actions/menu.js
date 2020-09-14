@@ -24,7 +24,7 @@ export const addDish = (dish) => {
     }
 }
 
-export const deleteDIsh = (id) => {
+export const deleteDish = (id) => {
     return async (dispatch) => {
         await axios.delete('http://localhost:3001/menu/' + id + '/').finally(() => {
             dispatch({
