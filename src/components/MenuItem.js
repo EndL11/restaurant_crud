@@ -1,7 +1,7 @@
 import React from 'react'
-import {Button} from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 
-export const MenuItem = ({item, onEditDish, onDeleteDish}) => {
+export const MenuItem = ({ item, onEditDish, onDeleteDish }) => {
     return <tr>
         <td>
             {item.name}

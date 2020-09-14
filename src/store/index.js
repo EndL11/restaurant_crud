@@ -1,4 +1,4 @@
-import { createStore, combineReducers, applyMiddleware } from 'redux'
+import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
 import thunk from 'redux-thunk'
 import { menuReducer } from '../store/reducers/menu'
 import { orderReducer } from '../store/reducers/order'
@@ -10,4 +10,6 @@ export const rootReducer = combineReducers({
     states: stateReducer
 });
 
-export default createStore(rootReducer, applyMiddleware(thunk));
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
+export default createStore(rootReducer, composeEnhancers(applyMiddleware(thunk)));
