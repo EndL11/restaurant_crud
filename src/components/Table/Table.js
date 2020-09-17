@@ -113,7 +113,7 @@ const Table = (props) => {
             name: dishes[i],
             count: Number(dishesCount[i]),
           });
-          price = getPriceFromMenu(dishes[i]) * +dishesCount[i];
+          price += getPriceFromMenu(dishes[i]) * +dishesCount[i];
         } else {
           alert("Wrong data!");
           return;

@@ -17,7 +17,7 @@ import {
 } from "../../store/actions/state";
 import { MenuItem } from "../MenuItem";
 import { ModalWindow } from "../ModalWindow";
-import { updateOrder } from "../../store/actions/order";
+import { updateOrder, loadOrders, deleteOrder } from "../../store/actions/order";
 
 const Menu = (props) => {
   const dispatch = useDispatch();
@@ -32,6 +32,7 @@ const Menu = (props) => {
 
   React.useEffect(() => {
     dispatch(loadMenu());
+    dispatch(loadOrders());
   }, [dispatch]);
 
   const onChangeEditingObject = (e) => {
@@ -47,6 +48,30 @@ const Menu = (props) => {
   };
 
   const onDeleteDish = (id) => {
+    const newList = orderList;
+    const deletingDish = menu.find((item) => item.id === id);
+    for (let i = 0; i < newList.length; i++) {
+      let hasDeletedItem = false;
+      let countOfDeletedDish = 0;
+      let orderDeleting = false;
+      for (let j = 0; j < newList[i].orderArray.length; j++) {
+        if (deletingDish.name === newList[i].orderArray[j].name) {
+          hasDeletedItem = true;
+          countOfDeletedDish += newList[i].orderArray[j].count;
+          newList[i].orderArray = newList[i].orderArray.filter(
+            (item) => item.name !== deletingDish.name
+          );
+          if(newList[i].orderArray.length === 0){
+            dispatch(deleteOrder(newList[i].id));
+            orderDeleting = true;
+          }
+        }
+      }
+      if (hasDeletedItem && orderDeleting == false) {
+        newList[i].totalPrice -= (countOfDeletedDish * deletingDish.price);
+        dispatch(updateOrder(newList[i]));
+      }
+    }
     dispatch(deleteDish(id));
   };
 
@@ -100,10 +125,12 @@ const Menu = (props) => {
 
     dispatch(addDish(newDish));
     handleModal();
+    dispatch(loadMenu());
   };
 
   const onSubmitEditing = (e) => {
     e.preventDefault();
+    dispatch(loadMenu());
     const editingDishIndex = menu.findIndex(
       (item) => item.id === editingDish.id
     );
@@ -133,9 +160,8 @@ const Menu = (props) => {
       if (priceChanged) {
         newList[i].totalPrice = newList[i]["orderArray"].reduce(
           (prev, curr) => {
-            console.log(prev, curr);
             let menuItem = menu.find((item) => item.name === curr.name);
-            if(menuItem.id === editingDish.id){
+            if (menuItem.id === editingDish.id) {
               menuItem = editingDish;
             }
             return prev + curr.count * menuItem.price;
