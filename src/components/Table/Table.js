@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Button, Col, Spinner } from "react-bootstrap";
+import { Form, Button, Spinner } from "react-bootstrap";
 
 import "./table.css";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -9,8 +9,13 @@ import { OrderDishInput } from "../OrderDishInput";
 import { ModalWindow } from "../ModalWindow";
 import { OrderFormButtons } from "../OrderFormButtons";
 import { addOrder, deleteOrder, loadOrders } from "../../store/actions/order";
-import { toggleModal } from "../../store/actions/state";
+import {
+  setEditingObject,
+  toggleModal,
+  resetEditingObject,
+} from "../../store/actions/state";
 import { loadMenu } from "../../store/actions/menu";
+import { OrderEditDishInput } from "../OrderEditDishInput";
 
 const Table = (props) => {
   const dispatch = useDispatch();
@@ -23,10 +28,12 @@ const Table = (props) => {
   };
   const showModal = useSelector((state) => state.states.showModal);
   const isEditing = useSelector((state) => state.states.isEditing);
-  const editingOrder = props.editingObj;
+  const editingObj = useSelector((state) => state.states.editingObject);
   let editingOrderForms = null;
 
-  useEffect(() => {
+  const [editingOrderObj, setEditingOrderObj] = React.useState(editingObj);
+
+  React.useEffect(() => {
     dispatch(loadOrders());
     dispatch(loadMenu());
   }, [dispatch]);
@@ -136,70 +143,74 @@ const Table = (props) => {
     };
     dispatch(addOrder(newOrder));
     handleClose();
+    dispatch(loadOrders());
   };
+
+  const onChangeEditingElement = (e) => {};
+
+  const deleteDishInput = (id) => {
+    setEditingOrderObj({
+      ...editingOrderObj,
+      orderArray: editingOrderObj.orderArray.filter((item) => item.id !== id),
+    });
+  };
+
+  const getEditingOrderForms = () => {
+    if (editingOrderObj !== null && editingOrderObj["orderArray"]) {
+      editingOrderForms = editingOrderObj["orderArray"].map((el) => {
+        let price =
+          menu.find((item) => el.name === item.name) !== undefined
+            ? (
+                menu.find((item) => el.name === item.name).price * el.count
+              ).toFixed(2)
+            : (0).toFixed(2);
+        return (
+          <OrderEditDishInput
+            key={el.id}
+            price={price}
+            onChangeEdit={onChangeEditingElement}
+            onDelete={deleteDishInput}
+            item={el}
+            options={options}
+          />
+        );
+      });
+    }
+  };
+
+  const onEditOrder = (id) => {
+    const editingOrder = orderList.find((item) => item.id === id);
+    dispatch(setEditingObject(editingOrder));
+    setEditingOrderObj(editingOrder);
+    handleClose();
+    getEditingOrderForms();
+  };
+
+  const onCancelEditing = () => {
+    handleClose();
+  };
+
+  const onApplyEditingOrder = () => {};
 
   const onDelete = (id) => {
     dispatch(deleteOrder(id));
-  }
-
-  const getEditingOrderForms = () => {
-    if (editingOrder !== null) {
-      editingOrderForms = editingOrder["orderArray"].map((el) => (
-        <Form.Group controlId="exampleForm.ControlSelect" key={el.id}>
-          <Form.Row>
-            <Col>
-              <Form.Label>Select dish:</Form.Label>
-              <Form.Control
-                as="select"
-                name="name"
-                onChange={(e) => props.onChangeEdit(e, el.id)}
-                className="name"
-                defaultValue={el.name}
-              >
-                {options}
-              </Form.Control>
-            </Col>
-            <Col style={{ marginRight: "20px" }}>
-              <Form.Label>Count</Form.Label>
-              <Form.Control
-                style={{ maxWidth: "100px" }}
-                type="number"
-                name="count"
-                onChange={(e) => props.onChangeEdit(e, el.id)}
-                className="count"
-                defaultValue={el.count}
-              />
-            </Col>
-            <Col>
-              <Form.Label>Price</Form.Label>
-              <Form.Label style={{ marginTop: "7px", display: "block" }}>
-                {menu.find((item) => el.name === item.name) !== undefined
-                  ? (
-                      menu.find((item) => el.name === item.name).price *
-                      el.count
-                    ).toFixed(2)
-                  : (0).toFixed(2)}
-                $
-              </Form.Label>
-            </Col>
-            <Col>
-              <Button
-                variant="warning"
-                onClick={() => {
-                  props.deleteForm(el.id, true);
-                }}
-              >
-                X
-              </Button>
-            </Col>
-          </Form.Row>
-        </Form.Group>
-      ));
-    }
   };
-  getEditingOrderForms();
 
-  var listInputs = props.forms.map((el) => (
+  const addDishInput = () => {
+    setEditingOrderObj({
+      ...editingOrderObj,
+      orderArray: [
+        ...editingOrderObj.orderArray,
+        {
+          id: props.idGenerator(),
+          name: menu[0].name,
+          count: 1,
+        },
+      ],
+    });
+  };
+
+  let listInputs = props.forms.map((el) => (
     <OrderDishInput
       key={el.id}
       element={el}
@@ -214,7 +225,7 @@ const Table = (props) => {
         key={item.orderId}
         item={item}
         onDelete={onDelete}
-        onEdit={props.onEdit}
+        onEdit={onEditOrder}
       />
     );
   });
@@ -231,18 +242,15 @@ const Table = (props) => {
             name="orderer"
             className="orderer"
             onChange={(e) => props.onChangeEdit(e)}
-            defaultValue={editingOrder["orderer"]}
+            defaultValue={editingOrderObj["orderer"]}
           />
         </Form.Group>
 
         {editingOrderForms}
-        <OrderFormButtons
-          onSubmit={props.applyEdit}
-          onAdd={props.addFormEdit}
-        />
+        <OrderFormButtons onSubmit={onApplyEditingOrder} onAdd={addDishInput} />
       </Form>
     );
-    modalHideAction = props.cancelEdit;
+    modalHideAction = onCancelEditing;
     modalTitle = "Editing order";
   } else {
     modalContent = (
@@ -302,6 +310,7 @@ const Table = (props) => {
         showModal={showModal}
         onHide={modalHideAction}
         title={modalTitle}
+        onExited={() => dispatch(resetEditingObject())}
       >
         {modalContent}
       </ModalWindow>

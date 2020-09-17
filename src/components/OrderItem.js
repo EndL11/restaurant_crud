@@ -7,6 +7,11 @@ export const OrderItem = ({ item, onEdit, onDelete }) => {
       onDelete(item.id);
     }
   }
+  
+  const editOrder = () => {
+    onEdit(item.id);
+  }
+
   return <tr>
     <td>{item.orderId}</td>
     <td>{item.orderer}</td>
@@ -19,7 +24,7 @@ export const OrderItem = ({ item, onEdit, onDelete }) => {
       {item.totalPrice.toFixed(2)}$</td>
     <td>
       <Button variant="outline-primary"
-        onClick={onEdit} value={item.orderId} className="td__button">Edit</Button>
+        onClick={editOrder} className="td__button">Edit</Button>
       <Button variant="outline-danger"
         onClick={onDeleteOrder} className="td__button">Delete</Button>
     </td>

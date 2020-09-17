@@ -23,6 +23,8 @@ import {
   deleteOrder,
 } from "../../store/actions/order";
 
+//  TODO: try to make reloading menu and order lists after updating and adding elements in actions/reducers
+
 const Menu = (props) => {
   const dispatch = useDispatch();
   const loading = useSelector((state) => state.menu.loading);
@@ -92,58 +94,56 @@ const Menu = (props) => {
   };
 
   const onHideEditing = () => {
-    dispatch(resetEditingObject());
     handleModal();
   };
 
-  
   const onAddDish = (e) => {
     e.preventDefault();
     let name = e.target.name.value;
     let price = Number(e.target.price.value);
-    
+
     if (
       name.split(" ").join("") === "" ||
       price <= 0 ||
       isNaN(price) === true
-      ) {
-        alert("Wrong data!");
-        return;
-      }
-      
-      // compare the same dish
-      let theSameDish = null;
-      if (menu !== null) {
-        theSameDish = menu.filter((element) => element.name === name).length;
-      }
-      
-      if (theSameDish > 0) {
-        alert("Wrong data! Dish is exists!");
-        return;
-      }
-      
-      let newDish = { menuId: props.idGenerator(), name, price };
-      
-      dispatch(addDish(newDish));
-      handleModal();
-      dispatch(loadMenu());
-    };
-    
-    const onSubmitEditing = (e) => {
-      e.preventDefault();
-      dispatch(loadMenu());
-      const editingDishIndex = menu.findIndex(
-        (item) => item.id === editingDish.id
-        );
-        for (let i = 0; i < menu.length; i++) {
-          if (editingDish.name === menu[editingDishIndex].name) continue;
-          
+    ) {
+      alert("Wrong data!");
+      return;
+    }
+
+    // compare the same dish
+    let theSameDish = null;
+    if (menu !== null) {
+      theSameDish = menu.filter((element) => element.name === name).length;
+    }
+
+    if (theSameDish > 0) {
+      alert("Wrong data! Dish is exists!");
+      return;
+    }
+
+    let newDish = { menuId: props.idGenerator(), name, price };
+
+    dispatch(addDish(newDish));
+    handleModal();
+    dispatch(loadMenu());
+  };
+
+  const onSubmitEditing = (e) => {
+    e.preventDefault();
+    dispatch(loadMenu());
+    const editingDishIndex = menu.findIndex(
+      (item) => item.id === editingDish.id
+    );
+    for (let i = 0; i < menu.length; i++) {
+      if (editingDish.name === menu[editingDishIndex].name) continue;
+
       if (menu[i].name === editingDish.name) {
         alert("Dish with this name already exists!");
         return;
       }
     }
-    
+
     // updating orderlist
     let newList = orderList;
     for (let i = 0; i < newList.length; i++) {
@@ -168,31 +168,31 @@ const Menu = (props) => {
             return prev + curr.count * menuItem.price;
           },
           0
-          );
-        }
-        if (priceChanged || nameChanged) {
-          dispatch(updateOrder(newList[i]));
-        }
+        );
       }
-      dispatch(updateMenu(editingDish));
-      dispatch(resetEditingObject());
-      handleModal();
-    };
-    
-    const list = menu.map((item) => (
-      <MenuItem
-        key={item.menuId}
-        item={item}
-        onDeleteDish={onDeleteDish}
-        onEditDish={onEditDish}
-      />
-    ));
-    
-    let modalContent, modalHideAction, modalTitle;
-    
-    if (isEditing) {
-      modalContent = (
-        <Form onSubmit={onSubmitEditing}>
+      if (priceChanged || nameChanged) {
+        dispatch(updateOrder(newList[i]));
+      }
+    }
+    dispatch(updateMenu(editingDish));
+    dispatch(resetEditingObject());
+    handleModal();
+  };
+
+  const list = menu.map((item) => (
+    <MenuItem
+      key={item.menuId}
+      item={item}
+      onDeleteDish={onDeleteDish}
+      onEditDish={onEditDish}
+    />
+  ));
+
+  let modalContent, modalHideAction, modalTitle;
+
+  if (isEditing) {
+    modalContent = (
+      <Form onSubmit={onSubmitEditing}>
         <Form.Group controlId="formBasicText">
           <Form.Label>Name</Form.Label>
           <Form.Control
@@ -284,6 +284,7 @@ const Menu = (props) => {
         showModal={showModal}
         onHide={modalHideAction}
         title={modalTitle}
+        onExited={() => dispatch(resetEditingObject())}
       >
         {modalContent}
       </ModalWindow>
