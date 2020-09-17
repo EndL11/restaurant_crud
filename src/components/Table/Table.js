@@ -8,7 +8,12 @@ import { OrderItem } from "../OrderItem";
 import { OrderDishInput } from "../OrderDishInput";
 import { ModalWindow } from "../ModalWindow";
 import { OrderFormButtons } from "../OrderFormButtons";
-import { addOrder, deleteOrder, loadOrders } from "../../store/actions/order";
+import {
+  addOrder,
+  deleteOrder,
+  loadOrders,
+  updateOrder,
+} from "../../store/actions/order";
 import {
   setEditingObject,
   toggleModal,
@@ -28,10 +33,11 @@ const Table = (props) => {
   };
   const showModal = useSelector((state) => state.states.showModal);
   const isEditing = useSelector((state) => state.states.isEditing);
-  const editingObj = useSelector((state) => state.states.editingObject);
-  let editingOrderForms = null;
 
-  const [editingOrderObj, setEditingOrderObj] = React.useState(editingObj);
+  const [editingOrderObj, setEditingOrderObj] = React.useState({});
+  const [dishInputs, setDishInputs] = React.useState([
+    { id: props.idGenerator(), count: 1 },
+  ]);
 
   React.useEffect(() => {
     dispatch(loadOrders());
@@ -45,6 +51,23 @@ const Table = (props) => {
     return Array.from(arr).map((el) => el.value);
   };
 
+  const deleteEmptyForms = (list) => {
+    if (list.length >= 1) {
+      let formIndex = null;
+      let i = 0;
+      while (i < list.length) {
+        if (list[i].count <= 0 || list[i].count === null) {
+          formIndex = list.findIndex((value) => value.id === list[i].id);
+          list.splice(formIndex, 1);
+        } else {
+          i++;
+        }
+      }
+    } else {
+      return;
+    }
+  };
+
   const wrongDataError = () => {
     alert("Wrong data! try again!");
   };
@@ -54,6 +77,14 @@ const Table = (props) => {
       menu.find((item) => name === item.name) !== undefined &&
       menu.find((item) => name === item.name).price
     );
+  };
+
+  const onDeleteDishInput = (id) => {
+    setDishInputs([...dishInputs.filter((input) => input.id !== id)]);
+  };
+
+  const addToNewDishInput = () => {
+    setDishInputs([...dishInputs, { id: props.idGenerator(), count: 1 }]);
   };
 
   const onAddOrder = (e) => {
@@ -146,7 +177,28 @@ const Table = (props) => {
     dispatch(loadOrders());
   };
 
-  const onChangeEditingElement = (e) => {};
+  const onChangeEditingElement = (e, id) => {
+    let orderer = editingOrderObj.orderer;
+    let orderArray = editingOrderObj.orderArray;
+
+    if (
+      e.target.name === "orderer" &&
+      e.target.value.split(" ").join("") !== ""
+    ) {
+      orderer = e.target.value.trim();
+    } else if (
+      e.target.name === "name" &&
+      e.target.value.split(" ").join("") !== ""
+    ) {
+      orderArray.find((val) => val.id === id).name = e.target.value.trim();
+    } else if (e.target.name === "count") {
+      orderArray.find((val) => val.id === id).count = e.target.value.trim();
+    } else {
+      alert("Wrong data!");
+      return;
+    }
+    setEditingOrderObj({ ...editingOrderObj, orderer, orderArray });
+  };
 
   const deleteDishInput = (id) => {
     setEditingOrderObj({
@@ -157,7 +209,7 @@ const Table = (props) => {
 
   const getEditingOrderForms = () => {
     if (editingOrderObj !== null && editingOrderObj["orderArray"]) {
-      editingOrderForms = editingOrderObj["orderArray"].map((el) => {
+      return editingOrderObj["orderArray"].map((el) => {
         let price =
           menu.find((item) => el.name === item.name) !== undefined
             ? (
@@ -179,18 +231,53 @@ const Table = (props) => {
   };
 
   const onEditOrder = (id) => {
-    const editingOrder = orderList.find((item) => item.id === id);
+    const editingOrder = JSON.parse(
+      JSON.stringify(orderList.find((item) => item.id === id))
+    );
     dispatch(setEditingObject(editingOrder));
     setEditingOrderObj(editingOrder);
     handleClose();
-    getEditingOrderForms();
   };
 
   const onCancelEditing = () => {
     handleClose();
   };
 
-  const onApplyEditingOrder = () => {};
+  const onApplyEditingOrder = (e) => {
+    e.preventDefault();
+
+    const editingIndex = orderList.findIndex(item => item.id === editingOrderObj.id);
+
+    editingOrderObj.totalPrice = editingOrderObj.orderArray.reduce(
+      (prev, curr) =>
+        prev + menu.find((item) => curr.name === item.name).price * curr.count,
+      0
+    );
+
+    deleteEmptyForms(editingOrderObj.orderArray);
+
+    for (let i = 0; i < orderList.length; i++) {
+      if (i === editingIndex)
+        continue;
+
+      if (orderList[i].orderer === editingOrderObj.orderer) {
+        alert("Order of this orderer already exists!");
+        return;
+      }
+    }
+
+    if (editingOrderObj.orderArray.length <= 0) {
+      alert("Wrong data!\nAdd some dishes!");
+      return;
+    } else {
+      if (editingOrderObj !== orderList[editingIndex]) {
+        dispatch(updateOrder(editingOrderObj));
+      }
+    }
+
+    handleClose();
+    setEditingOrderObj({});
+  };
 
   const onDelete = (id) => {
     dispatch(deleteOrder(id));
@@ -210,11 +297,13 @@ const Table = (props) => {
     });
   };
 
-  let listInputs = props.forms.map((el) => (
+  const editingOrderForms = getEditingOrderForms();
+
+  let listInputs = dishInputs.map((el) => (
     <OrderDishInput
       key={el.id}
       element={el}
-      deleteForm={props.deleteForm}
+      deleteForm={onDeleteDishInput}
       options={options}
     />
   ));
@@ -234,20 +323,22 @@ const Table = (props) => {
 
   if (isEditing) {
     modalContent = (
-      <Form>
+      <Form onSubmit={onApplyEditingOrder}>
         <Form.Group controlId="formBasicText">
           <Form.Label>Surname</Form.Label>
           <Form.Control
             type="text"
             name="orderer"
             className="orderer"
-            onChange={(e) => props.onChangeEdit(e)}
+            onChange={(e) => onChangeEditingElement(e)}
             defaultValue={editingOrderObj["orderer"]}
           />
         </Form.Group>
-
         {editingOrderForms}
-        <OrderFormButtons onSubmit={onApplyEditingOrder} onAdd={addDishInput} />
+        <OrderFormButtons
+          onSubmit={() => console.log("confirm editing")}
+          onAdd={addDishInput}
+        />
       </Form>
     );
     modalHideAction = onCancelEditing;
@@ -267,7 +358,7 @@ const Table = (props) => {
         {listInputs}
         <OrderFormButtons
           onSubmit={() => console.log("Submitted")}
-          onAdd={props.addForm}
+          onAdd={addToNewDishInput}
         />
       </Form>
     );

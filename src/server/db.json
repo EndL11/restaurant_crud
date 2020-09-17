@@ -34,16 +34,21 @@
   "orderList": [
     {
       "orderId": "f95cfab0-290e-45fa-9a6d-66fe0832abd7",
-      "orderer": "2",
+      "orderer": "21",
       "orderArray": [
         {
           "id": "0794d678-8c99-4c0f-ba7b-7fe0bed06cf0",
           "name": "Salad",
-          "count": 6
+          "count": "9"
+        },
+        {
+          "id": "9797c7f1-e48b-4fe5-a091-1313c2142622",
+          "name": "Pizza",
+          "count": 1
         }
       ],
-      "totalPrice": 36,
-      "id": 2
+      "id": 2,
+      "totalPrice": 66.5
     },
     {
       "orderId": "aadf2b3e-294f-47f7-ab5c-cc015f4ed336",
@@ -55,21 +60,21 @@
           "count": 2
         }
       ],
-      "totalPrice": 25.2,
+      "totalPrice": 25,
       "id": 4
     },
     {
       "orderId": "b9b80e5a-dc3f-444a-b7b2-f44cc64fc196",
-      "orderer": "1",
       "orderArray": [
         {
           "id": "17740ae5-8c81-4981-9537-6a7c58edad4e",
-          "name": "Salad",
+          "name": "Pizza",
           "count": 1
         }
       ],
       "totalPrice": 6,
-      "id": 5
+      "id": 5,
+      "orderer": "12"
     },
     {
       "orderId": "396089ee-e8c7-4584-87ee-3c1a7d19a5e4",
@@ -83,6 +88,19 @@
       ],
       "totalPrice": 25,
       "id": 6
+    },
+    {
+      "orderId": "7454aead-fbfa-4226-a02e-af753f7285e1",
+      "orderer": "113",
+      "orderArray": [
+        {
+          "id": "e2fbf332-d91a-44e9-850e-d14a0b5ac65e",
+          "name": "Salad",
+          "count": "3"
+        }
+      ],
+      "totalPrice": 18,
+      "id": 7
     }
   ]
 }

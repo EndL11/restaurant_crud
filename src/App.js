@@ -380,39 +380,13 @@ export function Application() {
             <br />
             <Route exact path="/">
               <Table
-                show_modal={show_modal}
-                closeModal={handleClose}
-                items={list}
-                menu={menu}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                isEditing={isEditing}
-                editingObj={editingObj}
-                applyEdit={applyEdit}
-                cancelEdit={cancelEdit}
-                onChangeEdit={onChangeEdit}
-                addForm={addForm}
                 forms={listForms}
-                deleteForm={deleteForm}
-                onAdd={onAdd}
-                addFormEdit={addFormEdit}
                 idGenerator={uuidv4}
               />
             </Route>
 
             <Route path="/menu">
               <Menu
-                show_modal={show_modal}
-                menu={menu}
-                closeModal={handleClose}
-                addDish={addDish}
-                onChangeDish={onChangeDish}
-                isEditingDish={isEditingDish}
-                editingDish={editingDish}
-                onDeleteDish={onDeleteDish}
-                onEditDish={onEditDish}
-                applyEditDish={applyEditDish}
-                cancelEditDish={cancelEditDish}
                 idGenerator={uuidv4}
               />
             </Route>

@@ -17,6 +17,7 @@ export const OrderDishInput = ({element, options, deleteForm}) => (
           type="number"
           name="count"
           className="count"
+          defaultValue={element?.count}
         />
       </Col>
       <Col>

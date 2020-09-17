@@ -1,22 +1,16 @@
 import React from "react";
 import { Form, Button, Col } from "react-bootstrap";
 
-export const OrderEditDishInput = ({
-  item,
-  onChangeEdit,
-  price,
-  onDelete,
-  options,
-}) => {
+export const OrderEditDishInput = ({ item, onChangeEdit, onDelete, price, options }) => {
   return (
-    <Form.Group controlId="exampleForm.ControlSelect">
+    <Form.Group controlId="exampleForm.ControlSelect" >
       <Form.Row>
         <Col>
           <Form.Label>Select dish:</Form.Label>
           <Form.Control
             as="select"
             name="name"
-            onChange={onChangeEdit}
+            onChange={(e) => onChangeEdit(e, item.id)}
             className="name"
             defaultValue={item.name}
           >
@@ -29,7 +23,7 @@ export const OrderEditDishInput = ({
             style={{ maxWidth: "100px" }}
             type="number"
             name="count"
-            onChange={onChangeEdit}
+            onChange={(e) => onChangeEdit(e, item.id)}
             className="count"
             defaultValue={item.count}
           />
@@ -41,7 +35,12 @@ export const OrderEditDishInput = ({
           </Form.Label>
         </Col>
         <Col>
-          <Button variant="warning" onClick={onDelete}>
+          <Button
+            variant="warning"
+            onClick={() => {
+              onDelete(item.id);
+            }}
+          >
             X
           </Button>
         </Col>

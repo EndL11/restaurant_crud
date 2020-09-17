@@ -21,7 +21,7 @@ export const OrderItem = ({ item, onEdit, onDelete }) => {
       )}
     </td>
     <td>
-      {item.totalPrice.toFixed(2)}$</td>
+      {(item?.totalPrice ?? 0).toFixed(2)}$</td>
     <td>
       <Button variant="outline-primary"
         onClick={editOrder} className="td__button">Edit</Button>
