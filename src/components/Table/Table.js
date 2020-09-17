@@ -243,10 +243,17 @@ const Table = (props) => {
     handleClose();
   };
 
+  const onCancelAdding = () => {
+    handleClose();
+    setDishInputs([{ id: props.idGenerator(), count: 1 }]);
+  };
+
   const onApplyEditingOrder = (e) => {
     e.preventDefault();
 
-    const editingIndex = orderList.findIndex(item => item.id === editingOrderObj.id);
+    const editingIndex = orderList.findIndex(
+      (item) => item.id === editingOrderObj.id
+    );
 
     editingOrderObj.totalPrice = editingOrderObj.orderArray.reduce(
       (prev, curr) =>
@@ -257,8 +264,7 @@ const Table = (props) => {
     deleteEmptyForms(editingOrderObj.orderArray);
 
     for (let i = 0; i < orderList.length; i++) {
-      if (i === editingIndex)
-        continue;
+      if (i === editingIndex) continue;
 
       if (orderList[i].orderer === editingOrderObj.orderer) {
         alert("Order of this orderer already exists!");
@@ -362,7 +368,7 @@ const Table = (props) => {
         />
       </Form>
     );
-    modalHideAction = handleClose;
+    modalHideAction = onCancelAdding;
     modalTitle = "Adding new order";
   }
 

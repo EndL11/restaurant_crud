@@ -23,12 +23,6 @@
       "name": "Sandwich",
       "price": 5,
       "id": 12
-    },
-    {
-      "menuId": "32370147-0bf6-46a7-a5d6-2e5b16df6d10",
-      "name": "55",
-      "price": 2,
-      "id": 14
     }
   ],
   "orderList": [
@@ -44,11 +38,11 @@
         {
           "id": "9797c7f1-e48b-4fe5-a091-1313c2142622",
           "name": "Pizza",
-          "count": 1
+          "count": "2"
         }
       ],
       "id": 2,
-      "totalPrice": 66.5
+      "totalPrice": 79
     },
     {
       "orderId": "aadf2b3e-294f-47f7-ab5c-cc015f4ed336",
