@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { ADD_ORDER, DELETE_ORDER, LOAD_ORDERS } from "../types";
+import { ADD_ORDER, DELETE_ORDER, LOAD_ORDERS, UPDATE_ORDER } from "../types";
 
 export const addOrder = (order) => {
   return async (dispatch) => {
@@ -28,5 +28,22 @@ export const deleteOrder = (id) => {
   return async (dispatch) => {
     await axios.delete("http://localhost:3001/orderList/" + id + "/");
     dispatch({ type: DELETE_ORDER, payload: id });
+  };
+};
+
+export const updateOrder = (updatedOrder) => {
+  return async (dispatch) => {
+    console.log(updatedOrder);
+    await axios
+      .put(
+        "http://localhost:3001/orderList/" + updatedOrder.id + "/",
+        updatedOrder
+      )
+      .finally(() => {
+        dispatch({
+          type: UPDATE_ORDER,
+          payload: updatedOrder,
+        });
+      });
   };
 };

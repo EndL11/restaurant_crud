@@ -1,4 +1,4 @@
-import { ADD_ORDER, DELETE_ORDER, LOAD_ORDERS } from "../types";
+import { ADD_ORDER, DELETE_ORDER, LOAD_ORDERS, UPDATE_ORDER } from "../types";
 
 const initialState = {
   orderList: [],
@@ -23,6 +23,15 @@ export const orderReducer = (state = initialState, action) => {
           (order) => order.id !== action.payload
         ),
       };
+    }
+    case UPDATE_ORDER: {
+      const newOrderList = state.orderList.map(item => {
+        if(item.orderId === action.payload.orderId){
+          item = action.payload;
+        }
+        return item;
+      });
+      return {...state, orderList: newOrderList}
     }
     default:
       return state;

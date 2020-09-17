@@ -7,6 +7,10 @@ export const MenuItem = ({ item, onEditDish, onDeleteDish }) => {
       onDeleteDish(item.id);
     }
   };
+
+  const onEdit = () => {
+    onEditDish(item.menuId);
+  };
   return (
     <tr>
       <td>{item.name}</td>
@@ -14,7 +18,7 @@ export const MenuItem = ({ item, onEditDish, onDeleteDish }) => {
       <td>
         <Button
           variant="outline-primary"
-          onClick={onEditDish}
+          onClick={onEdit}
           value={item.menuId}
           className="td__button"
         >

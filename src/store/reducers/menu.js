@@ -1,4 +1,4 @@
-import { ADD_DISH, DELETE_DISH, LOAD_MENU } from "../types";
+import { ADD_DISH, DELETE_DISH, LOAD_MENU, UPDATE_MENU } from "../types";
 
 const initialState = {
   menuList: [],
@@ -18,6 +18,15 @@ export const menuReducer = (state = initialState, action) => {
         ...state,
         menuList: state.menuList.filter((el) => el.id !== action.payload),
       };
+    }
+    case UPDATE_MENU: {
+      const newMenu = state.menuList.map(item => {
+        if(item.menuId === action.payload.menuId){
+          item = action.payload;
+        }
+        return item;
+      });
+      return {...state, menuList: newMenu}
     }
     default:
       return state;
